@@ -1,0 +1,19 @@
+{
+  "name": "demo-cloner-worker",
+  "version": "1.0.0",
+  "description": "Automated website cloner worker for Magic Demo - triggered via GitHub Actions",
+  "type": "module",
+  "scripts": {
+    "clone": "node scripts/clone-and-deploy.mjs",
+    "test": "node scripts/clone-and-deploy.mjs --dry-run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "playwright": "^1.52.0",
+    "mime-types": "^2.1.35"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

@@ -80,7 +80,7 @@ async function main() {
     for (const vp of VIEWPORTS) {
       const context = await browser.newContext({
         viewport: { width: vp.width, height: vp.height },
-        deviceScaleFactor: 2
+        deviceScaleFactor: 1
       });
       const page = await context.newPage();
 
@@ -89,8 +89,13 @@ async function main() {
         // Wait a bit for animations/lazy content
         await page.waitForTimeout(2000);
 
+        // Take full-page screenshot for reference, but viewport-only JPEG for Claude API
         const screenshotPath = path.join(SCREENSHOTS_DIR, `${vp.name}.png`);
         await page.screenshot({ path: screenshotPath, fullPage: true });
+
+        // Also save a viewport-only JPEG (much smaller) for Claude API
+        const jpegPath = path.join(SCREENSHOTS_DIR, `${vp.name}_api.jpeg`);
+        await page.screenshot({ path: jpegPath, fullPage: false, type: 'jpeg', quality: 70 });
         screenshots[vp.name] = screenshotPath;
         console.log(`   ✅ ${vp.name} screenshot (${vp.width}x${vp.height})`);
       } catch (err) {
@@ -326,22 +331,30 @@ async function generateHtmlWithClaude(extraction, screenshots, assetMap) {
     .map(([original, local]) => `  "${original}" → "${local}"`)
     .join('\n');
 
-  // Read desktop screenshot as base64 for vision
+  // Read desktop screenshot as base64 for vision (use JPEG viewport version to stay under 5MB)
   const messageContent = [];
 
-  // Add screenshot if available
-  if (screenshots.desktop) {
+  // Add screenshot if available — prefer the smaller _api.jpeg version
+  const apiScreenshot = screenshots.desktop?.replace('.png', '_api.jpeg');
+  const screenshotToSend = apiScreenshot || screenshots.desktop;
+  if (screenshotToSend) {
     try {
-      const screenshotData = await fs.readFile(screenshots.desktop);
+      const screenshotData = await fs.readFile(screenshotToSend);
+      const isJpeg = screenshotToSend.endsWith('.jpeg') || screenshotToSend.endsWith('.jpg');
       const base64 = screenshotData.toString('base64');
-      messageContent.push({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: 'image/png',
-          data: base64
-        }
-      });
+      // Skip if still over 5MB
+      if (screenshotData.length < 5 * 1024 * 1024) {
+        messageContent.push({
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: isJpeg ? 'image/jpeg' : 'image/png',
+            data: base64
+          }
+        });
+      } else {
+        console.log('   ⚠️ Screenshot still too large for API, sending text-only');
+      }
     } catch {}
   }
 

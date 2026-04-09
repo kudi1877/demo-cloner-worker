@@ -16,7 +16,8 @@
  * @param {string} config.demoId - Demo ID for tracking
  * @returns {string} HTML with overlay injected
  */
-export function injectOverlay(html, config = {}) {
+export function injectOverlay(html, config) {
+  config = config || {};
   const {
     buttonLabel = 'Start Demo',
     buttonColor = '#6366f1',

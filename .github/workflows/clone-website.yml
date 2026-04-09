@@ -28,7 +28,7 @@ jobs:
       - name: Run website cloner
         run: node scripts/clone-and-deploy.mjs
         env:
-          TARGET_URL: ${{ github.event.client_payload.url }}
+          TARGET_URL: ${{ github.event.client_payload.websiteUrl }}
           DEMO_ID: ${{ github.event.client_payload.demoId }}
           CALLBACK_URL: ${{ github.event.client_payload.callbackUrl }}
           DEMO_CONFIG: ${{ toJSON(github.event.client_payload.demoConfig) }}

@@ -147,8 +147,7 @@ async function main() {
     await fs.writeFile(path.join(OUTPUT_DIR, 'index.html'), finalHtml);
     console.log(`   ✅ Final HTML written to output/index.html`);
 
-    // Copy assets
-    await fs.cp(ASSETS_DIR, path.join(OUTPUT_DIR, 'assets'), { recursive: true });
+    // Assets are already in OUTPUT_DIR/assets (ASSETS_DIR), no copy needed
 
     await context.close();
 

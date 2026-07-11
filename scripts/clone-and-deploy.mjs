@@ -57,6 +57,14 @@ async function main() {
   console.log(`   Dry run: ${DRY_RUN}`);
 
   if (!TARGET_URL) {
+    // Report back before dying — otherwise the portal's demo stays stuck at 'processing' forever
+    if (!DRY_RUN && CALLBACK_URL) {
+      await sendCallback({
+        demoId: DEMO_ID,
+        status: 'failed',
+        error: 'TARGET_URL missing from dispatch payload'
+      }).catch(e => console.error('Failed to send error callback:', e.message));
+    }
     throw new Error('TARGET_URL environment variable is required');
   }
 

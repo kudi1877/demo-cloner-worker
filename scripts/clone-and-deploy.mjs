@@ -411,7 +411,7 @@ Output ONLY the HTML document, no explanations or markdown fences.`
   });
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-5',
     max_tokens: 16000,
     messages: [{
       role: 'user',
